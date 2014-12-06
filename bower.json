@@ -1,0 +1,15 @@
+{
+  "name": "guss",
+  "description": "Gulp powered static site generator, based on jekyll and very opinionated",
+  "version": "1.0.0",
+  "homepage": "https://github.com/sebastiandedeyne/guss",
+  "authors": [
+    "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "modernizr": "~2.8.3"
+  }
+}

@@ -1,0 +1,7 @@
+# Build configuration
+destination: _site
+pretty_permalinks: true
+
+# Site settings
+title: Site Title
+description: Gulp static generator
