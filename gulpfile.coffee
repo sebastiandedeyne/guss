@@ -88,7 +88,7 @@ gulp.task 'assets', ->
   gulp.src [
     'assets/**/**'
   ]
-  .pipe gulp.dest(config.destination + '/assets')
+  .pipe gulp.dest(config.destination)
 
 
 gulp.task 'views', ->
