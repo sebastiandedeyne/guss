@@ -31,6 +31,6 @@ The following options can be set in `config.yml`:
 
 ## Future features
 - Improved site config (enable multiple files to save actual data)
+- Allow views without templates
 - Add partial support for views
 - Could use some better error handling to ensure the watch task breaks as little as possible
-- Yeoman generator under consideration
