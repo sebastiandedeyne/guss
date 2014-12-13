@@ -60,6 +60,12 @@ gulp.task 'css', ->
     .pipe gulpif !argv.dev, do minifyCSS
     .pipe gulp.dest(config.destination + '/css')
 
+  gulp.src 'css/images/**/**'
+    .pipe gulp.dest(config.destination + '/css/images')
+
+  gulp.src 'css/fonts/**/**'
+    .pipe gulp.dest(config.destination + '/css/fonts')
+
     
 gulp.task 'js', ->
   coffeeSettings = 
@@ -105,13 +111,17 @@ gulp.task 'views', ->
     remove: true
   .pipe do ->
     through.obj (file, enc, cb) ->
-      layout = file.page.layout || 'default'
-      template = swig.compileFile path.join('views', '_layouts', layout + '.html')
+      layout = file.page.layout
       data =
         site: siteData
         page: file.page
-      data['content'] = swig.render file.contents.toString(), { locals: data }
-      file.contents = new Buffer template(data), 'utf8'
+      content = swig.render file.contents.toString(), { locals: data }
+      if layout
+        template = swig.compileFile path.join('views', '_layouts', layout + '.html')
+        data['content'] = content
+        file.contents = new Buffer template(data), 'utf8'
+      else
+        file.contents = new Buffer content, 'utf8'
       @push file
       do cb
   .pipe rename (path) ->
@@ -126,10 +136,10 @@ gulp.task 'views', ->
 
 gulp.task 'watch', ->
   console.log 'Watching for changes...'
-  gulp.watch '/css/**/**', ['css']
-  gulp.watch '/js/**/**', ['js']
-  gulp.watch '/assets/**/**', ['assets']
-  gulp.watch '/views/**/**', ['views']
+  gulp.watch 'css/**/**', ['css']
+  gulp.watch 'js/**/**', ['js']
+  gulp.watch 'assets/**/**', ['assets']
+  gulp.watch 'views/**/**', ['views'] 
 
 
 gulp.task 'webserver', ->
@@ -154,4 +164,5 @@ gulp.task 'build', ['clean'], ->
 
 
 gulp.task 'serve', ['build'], ->
-  gulp.start [ 'webserver', 'watch' ]
+  gulp.start 'webserver'
+  gulp.start 'watch'

@@ -30,7 +30,7 @@ The following options can be set in `config.yml`:
 - server_port (**8000**)
 
 ## Future features
-- Improved site config (enable multiple files to save actual data)
-- Allow views without templates
 - Add partial support for views
-- Could use some better error handling to ensure the watch task breaks as little as possible
+- Add template support for views
+- Better error handling to ensure the watch task breaks as little as possible
+- Improved site config (enable multiple files to save actual data)
