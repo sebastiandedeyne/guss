@@ -2,8 +2,8 @@
 del           = require 'del'
 gulp          = require 'gulp'
 autoprefixer  = require 'gulp-autoprefixer'
-base64        = require 'gulp-base64'
 bourbon       = require 'node-bourbon'
+base64        = require 'gulp-base64'
 coffee        = require 'gulp-coffee'
 concat        = require 'gulp-concat'
 frontmatter   = require 'gulp-front-matter'
@@ -19,11 +19,20 @@ runSequence   = require 'run-sequence'
 swig          = require 'swig'
 through       = require 'through2'
 yaml          = require 'yamljs'
+objectMerge   = require 'object-merge'
 {argv}        = require 'yargs'
 
 
 # Load configuration
-config = yaml.load 'config.yml'
+configSite = yaml.load 'config.site.yml'
+
+try
+  configLocal = yaml.load 'config.local.yml'
+catch
+  configLocal = {}
+
+config = objectMerge configSite, configLocal
+
 
 # Dev environment by default
 if !argv.production
@@ -32,7 +41,7 @@ if !argv.production
 
 # Tasks
 gulp.task 'css', ->
-  sassSettings = 
+  sassSettings =
     includePaths: bourbon.includePaths
 
   base64Settings = 
@@ -60,11 +69,11 @@ gulp.task 'css', ->
     .pipe gulpif !argv.dev, do minifyCSS
     .pipe gulp.dest(config.destination + '/css')
 
-  gulp.src 'css/images/**/**'
-    .pipe gulp.dest(config.destination + '/css/images')
+  gulp.src 'css/assets/images/**/**'
+    .pipe gulp.dest(config.destination + '/css/assets/images')
 
-  gulp.src 'css/fonts/**/**'
-    .pipe gulp.dest(config.destination + '/css/fonts')
+  gulp.src 'css/assets/fonts/**/**'
+    .pipe gulp.dest(config.destination + '/css/assets/fonts')
 
     
 gulp.task 'js', ->
@@ -91,8 +100,13 @@ gulp.task 'js', ->
 
 
 gulp.task 'assets', ->
+  gulp.src 'assets/**/**', dot: true
+  .pipe gulp.dest(config.destination)
+
+
+gulp.task 'assets-static', ->
   gulp.src [
-    'assets/**/**'
+    'assets-static/**/**'
   ]
   .pipe gulp.dest(config.destination)
 
@@ -111,17 +125,14 @@ gulp.task 'views', ->
     remove: true
   .pipe do ->
     through.obj (file, enc, cb) ->
-      layout = file.page.layout
+      swig.setDefaults { autoescape: false, cache: false }
+      layout = file.page.layout || 'default'
+      template = swig.compileFile path.join('views', '_layouts', layout + '.html')
       data =
         site: siteData
         page: file.page
-      content = swig.render file.contents.toString(), { locals: data }
-      if layout
-        template = swig.compileFile path.join('views', '_layouts', layout + '.html')
-        data['content'] = content
-        file.contents = new Buffer template(data), 'utf8'
-      else
-        file.contents = new Buffer content, 'utf8'
+      data['content'] = swig.render file.contents.toString(), { locals: data }
+      file.contents = new Buffer template(data), 'utf8'
       @push file
       do cb
   .pipe rename (path) ->
@@ -138,14 +149,14 @@ gulp.task 'watch', ->
   console.log 'Watching for changes...'
   gulp.watch 'css/**/**', ['css']
   gulp.watch 'js/**/**', ['js']
-  gulp.watch 'assets/**/**', ['assets']
-  gulp.watch 'views/**/**', ['views'] 
+  gulp.watch 'views/**/**', ['views']
 
 
 gulp.task 'webserver', ->
   port = config.server_port || 8000
   gulp.src config.destination
     .pipe webserver
+      livereload: config.livereload || true
       port: port
 
 
@@ -160,9 +171,7 @@ gulp.task 'build', ['clean'], ->
     console.log 'Generating production build'
 
   del config.destination, ->
-    gulp.start ['css', 'js', 'assets', 'views']
+    gulp.start ['css', 'js', 'assets', 'assets-static', 'views']
 
 
-gulp.task 'serve', ['build'], ->
-  gulp.start 'webserver'
-  gulp.start 'watch'
+gulp.task 'serve', ['webserver', 'watch']
