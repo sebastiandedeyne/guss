@@ -56,6 +56,7 @@ gulp.task 'css', ->
     base64Settings.debug = true
 
   gulp.src 'css/**/*.scss'
+    .pipe include()
     .pipe sass(sassSettings).on 'error', (error) ->
       console.log do error.toString
       @emit 'end'
@@ -65,6 +66,7 @@ gulp.task 'css', ->
     .pipe gulp.dest(config.destination + '/css')
 
   gulp.src 'css/**/*.css'
+    .pipe include()
     .pipe autoprefixer autoprefixerSettings
     .pipe gulpif !argv.dev, do minifyCSS
     .pipe gulp.dest(config.destination + '/css')
