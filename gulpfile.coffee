@@ -24,7 +24,7 @@ objectMerge   = require 'object-merge'
 
 
 # Load configuration
-configSite = yaml.load 'config.site.yml'
+configSite = yaml.load 'config.yml'
 
 try
   configLocal = yaml.load 'config.local.yml'
